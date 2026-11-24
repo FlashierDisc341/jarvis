@@ -61,19 +61,15 @@ Wait for **LISTENING** in the window before you speak. To shut him down, say **"
 
 ⚠️ On the first installer screen, **check "Add python.exe to PATH"** before clicking Install.
 
-### 3. Get access
-This repo is private. Ask FlashierDisc341 to add you, then accept the invite from your email.
+### 3. Run the installer
+Click **`Install_JARVIS.bat`** in the file list above → click the **download** button (top right of the file view) → double-click the downloaded file.
 
-### 4. Run the installer
-Download **`Install_JARVIS.bat`** from this repo and double-click it.
-
-- A GitHub login window pops up the first time. Log in.
 - It downloads around **2 GB** of packages, so give it a while.
 - At the end it lists your microphones. **Type the number** of the one you use.
 
 JARVIS gets installed in `C:\Users\<you>\Jarvis`.
 
-### 5. Make a shortcut
+### 4. Make a shortcut
 In that folder, right-click **`Start_JARVIS.bat`** → *Send to* → **Desktop (create shortcut)**.
 
 The first start takes a bit longer, because he downloads his speech model (one time only).
@@ -196,7 +192,7 @@ Check that NVIDIA Instant Replay is on, and that your NVIDIA hotkey matches `cli
 Put your `latitude` and `longitude` in `config.json`.
 
 **Something else broke**
-Screenshot the whole black window and send it to FlashierDisc341.
+Open an issue in the **Issues** tab of this repo, with a screenshot of the whole black window.
 
 ---
 

@@ -1,0 +1,12 @@
+# never upload these to GitHub
+.venv-whisper/
+__pycache__/
+config.json
+screenshots/
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.log
+data/
+models/

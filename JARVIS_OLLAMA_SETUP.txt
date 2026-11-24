@@ -1,0 +1,171 @@
+JARVIS - LOCAL OLLAMA ROUTING UPDATE
+===================================
+Built against the files you uploaded on September 21, 2026.
+
+WHAT THIS UPDATE DOES
+--------------------
+Whisper still transcribes speech and Piper still speaks replies.
+The current Actions parser gets the first chance to handle every command.
+Only otherwise-unrecognized requests go to local Ollama (qwen2.5:3b).
+The model returns a small validated intent object, not executable code.
+
+Read-only interpretations, such as asking the current time in another way,
+go through the existing handlers.
+
+Interpreted changes, such as "get Notepad up for me", ask:
+  I understood: open Notepad. Say confirm interpretation, or cancel.
+Say exactly "confirm interpretation" to proceed.
+Any existing app-choice, loud-volume or force-end confirmation still follows.
+
+While ANY native choice, confirmation, or note dictation is pending, the model
+is bypassed. The existing wake phrase, 15-second answer window, organizer
+storage, timers and reminder announcements remain in the Whisper entry point.
+
+This is an intent interpreter, not open-ended conversation or an autonomous
+computer agent. Model-generated answers are not spoken as factual answers.
+No weather, web search, music search, in-app automation, arbitrary scripts,
+typing, file deletion, PC shutdown or restart are added.
+
+FILES TO INSTALL
+----------------
+Stop the currently running Jarvis with Ctrl+C first.
+
+Back up these four existing files somewhere outside the project folder:
+  jarvis_whisper.py
+  jarvis_actions.py
+  jarvis_intent.py
+  jarvis_help.py
+
+Put the four attached replacements in the SAME folder as your current
+jarvis_whisper.py. Keep their filenames exactly as above.
+Add test_jarvis_intent.py to that folder too.
+
+Keep all other existing files:
+  jarvis_whisper_audio.py
+  jarvis_dialogue.py
+  jarvis_processes.py
+  jarvis_time.py
+  jarvis_desktop.py
+  jarvis_math.py
+  jarvis_monitor.py
+  jarvis_organizer.py
+  voices/
+  data/
+
+Do not delete or replace data/jarvis-organizer.sqlite3.
+No database migration or reset is part of this update.
+No pip packages are added by this update.
+No jarvis_weather.py is required.
+
+TEST FIRST - POWERSHELL IN YOUR PROJECT FOLDER
+----------------------------------------------
+1. Offline routing tests:
+   .\.venv-whisper\Scripts\python.exe -B .\test_jarvis_intent.py
+
+   These use fake Actions and fake model responses. They do not open apps,
+   change volume, touch your organizer database, record audio, or contact
+   Ollama. Expect the tests to finish with OK.
+   They test routing and validation, not Windows integration or model accuracy.
+
+2. Check the installed local model and its real structured response:
+   .\.venv-whisper\Scripts\python.exe .\jarvis_intent.py --check
+
+   Expect:
+   PASS: qwen2.5:3b returned a valid time intent. No PC action was executed.
+
+   If the service cannot be reached, open Ollama on Windows.
+   If it is already running, do not start a second server.
+   If the model is missing, run:
+   ollama pull qwen2.5:3b
+
+3. Preview an actual interpretation without executing an action:
+   .\.venv-whisper\Scripts\python.exe .\jarvis_intent.py --text "get Notepad up for me"
+
+   Expected intent: open
+   Expected argument: Notepad
+   Expected confirmation flag: True
+   This diagnostic prints the interpretation only.
+   A model can still return unknown or misunderstand; inspect the output.
+
+4. Start normal voice control:
+   .\.venv-whisper\Scripts\python.exe .\jarvis_whisper.py
+
+VOICE CHECKS
+------------
+Wait for LISTENING each time.
+
+  "Jarvis, what time is it?"
+    Existing native parser should answer directly, without an Ollama call.
+
+  "Jarvis, could you tell me the current hour?"
+    Intended fallback test.
+    Terminal should show OLLAMA PLAN: time -> what time is it.
+    A time answer alone is NOT proof; inspect the OLLAMA terminal line.
+
+  "Jarvis, get Notepad up for me."
+    Terminal should show OLLAMA PLAN: open -> open Notepad.
+    Jarvis asks for confirm interpretation.
+    Say "cancel" first to verify that nothing opens.
+    Ask again, then say "confirm interpretation" to test dispatch.
+    If app lookup asks another question, answer that question as usual.
+
+  "Jarvis, take a note."
+    Wait for the dictation prompt, then say:
+      Jarvis open Chrome
+    Those words should be read back AS A NOTE, not executed as a command.
+    Say cancel; no note is saved.
+
+  "Jarvis, set a timer for ten seconds."
+    This still uses the existing timer parser.
+    It should announce when due while Jarvis remains running.
+
+LIMITS AND FALLBACKS
+-------------------
+Natural phrasing is supported only for the intents listed in jarvis_intent.py.
+Exact commands still cover the larger existing command set, including maths,
+date calculations, named timers, timer cancellation, and detailed organizer work.
+
+The model is not used to rewrite note bodies, reminder bodies or calculations.
+Use the original help examples for those commands.
+"Take a note" may be paraphrased to start dictation, but a paraphrase containing
+the note body is deliberately not supported.
+
+Unrecognized requests send only that utterance and a fixed schema/prompt to:
+  http://127.0.0.1:11434
+The client disables proxies and redirects. It does not send your saved notes,
+app catalogue or conversation history to the model.
+
+The voice-loop wait is bounded to 30 seconds.
+If a timer/reminder becomes due during model interpretation, the interpretation
+is discarded and the alert takes priority. A late model response cannot run an
+action. An old request may briefly still be finishing in its background thread.
+
+For exact-command-only operation:
+  .\.venv-whisper\Scripts\python.exe .\jarvis_whisper.py --no-ollama
+
+Existing microphone-only dry run remains available:
+  .\.venv-whisper\Scripts\python.exe .\jarvis_whisper.py --dry-run
+
+Dry run does not open the organizer database, execute controls, OR call Ollama.
+Use jarvis_intent.py --text for the separate no-action model test.
+
+WHAT WAS AND WAS NOT VERIFIED
+----------------------------
+The supplied source was inspected and the changes preserve the existing action
+handlers; only a handled flag and the final unrecognized-command return changed
+inside jarvis_actions.py.
+
+Automated Python tests have NOT been run in Steward's environment: no Python
+executable was available. The attached offline tests are provided for your PC.
+The real Ollama service, Whisper microphone loop, Piper playback and Windows
+actions have NOT been tested here.
+
+Your current jarvis_math.py, jarvis_processes.py and jarvis_whisper_audio.py were
+not part of this latest inspected upload set; they are not modified.
+A successful --check validates the local model/API path, not every voice command.
+The voice checks above validate the remaining installation-dependent behavior.
+
+API REFERENCES
+--------------
+https://docs.ollama.com/api/chat
+https://docs.ollama.com/capabilities/structured-outputs
